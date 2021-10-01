@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
@@ -21,45 +22,61 @@ public class GameController : MonoBehaviour
     }
 
     [SerializeField] Text pointsText;
+    [SerializeField] Transform playerBilly;
 
     int points = 0;
+    float sideLimit = 5.0f;
+    float straightLineLimit = 0.50f;
 
     [HideInInspector] public Vector3 clickPosition;
     [HideInInspector] public int direction = 0;
+    [HideInInspector] public bool startGame = false;
+    [HideInInspector] public bool canTurnLeft = false;
+    [HideInInspector] public bool canTurnRight = false;
 
     public Image startImage;
-    public bool startGame = false;
 
     void Update()
     {
-        if (startGame)
+        if (Input.touchCount == 1 && startGame)
         {
-            if (Input.touchCount == 1)
-            {
-                Touch touch = Input.GetTouch(0);
-                clickPosition = touch.position;
+            Touch touch = Input.GetTouch(0);
+            clickPosition = touch.position;
 
+            if (touch.phase == TouchPhase.Began)
+            {
                 SetBillysDirection();
-                /*
-                if (touch.phase == TouchPhase.Began)
-                {
-                    points++;
-                }
-                */
-                pointsText.text = points.ToString();
             }
+            
+            pointsText.text = points.ToString();
+        }
+        else if (!startGame)
+        {
+            direction = 0;
         }
     }
 
     void SetBillysDirection()
     {
-        if (clickPosition.x > Screen.width / 2)
+        //if (playerBilly.localEulerAngles.y > -straightLineLimit && playerBilly.localEulerAngles.y < straightLineLimit)
+
+        if ((clickPosition.x > Screen.width / 2) && playerBilly.position.x < sideLimit)
         {
             direction = 1;
         }
-        else
+
+        if ((clickPosition.x < Screen.width / 2) && playerBilly.position.x > -sideLimit)
         {
             direction = -1;
         }
+    }
+
+    public bool IsPointerOverUI()
+    {
+        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
+        pointerEventData.position = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerEventData, results);
+        return results.Count > 0;
     }
 }

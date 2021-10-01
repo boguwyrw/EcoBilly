@@ -8,6 +8,7 @@ public class StartImage : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         GameController.Instance.startGame = true;
-        GameController.Instance.startImage.gameObject.SetActive(false);
+        GameController.Instance.startImage.gameObject.transform.parent.gameObject.SetActive(false);
+        GameController.Instance.direction = 0;
     }
 }
