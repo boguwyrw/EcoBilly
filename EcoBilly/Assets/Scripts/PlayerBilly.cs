@@ -18,7 +18,7 @@ public class PlayerBilly : MonoBehaviour
         billyAnimator = GetComponent<Animator>();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (GameController.Instance.startGame)
         {
