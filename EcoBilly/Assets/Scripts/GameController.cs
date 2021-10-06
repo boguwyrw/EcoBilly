@@ -21,15 +21,15 @@ public class GameController : MonoBehaviour
         _instance = this;
     }
 
-    [SerializeField] Text pointsText;
     [SerializeField] Transform playerBilly;
+    [SerializeField] Text pointsText;
 
-    int points = 0;
     float sideLimit = 5.0f;
     float straightLineLimit = 0.50f;
 
     [HideInInspector] public Vector3 clickPosition;
     [HideInInspector] public int direction = 0;
+    [HideInInspector] public int points = 0;
     [HideInInspector] public bool startGame = false;
     [HideInInspector] public bool canTurnLeft = false;
     [HideInInspector] public bool canTurnRight = false;
@@ -58,8 +58,6 @@ public class GameController : MonoBehaviour
 
     void SetBillysDirection()
     {
-        //if (playerBilly.localEulerAngles.y > -straightLineLimit && playerBilly.localEulerAngles.y < straightLineLimit)
-
         if ((clickPosition.x > Screen.width / 2) && playerBilly.position.x < sideLimit)
         {
             direction = 1;

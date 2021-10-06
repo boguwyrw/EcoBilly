@@ -4,16 +4,14 @@ using UnityEngine;
 
 public class PlayerBilly : MonoBehaviour
 {
-    float billyWalkingSpeed = 5.2f;
-    float billyRotationSpeed = 150.0f;
+    float billyWalkingSpeed = 5.0f;
+    float billyRotationSpeed = 160.0f;
     float billysAngle = 0.0f;
-    float maxAngle = 70.0f;
+    float maxAngle = 60.0f;
     float minAngle = 1.5f;
-    float sideLimit = 2.8f;
     bool turnedAround = false;
     Animator billyAnimator;
     Vector3 velocity;
-    // granica: 4.2f i -4.2f
 
     void Start()
     {
@@ -29,8 +27,6 @@ public class PlayerBilly : MonoBehaviour
             SetBillysAngles();
 
             BillysRotation();
-
-            BoundariesDetection();
         }
 
         BillysAnimation();
@@ -46,11 +42,11 @@ public class PlayerBilly : MonoBehaviour
 
     void SetBillysAngles()
     {
-        if (transform.localEulerAngles.y < 360 && transform.localEulerAngles.y >= 250)
+        if (transform.localEulerAngles.y < 360 && transform.localEulerAngles.y >= 270)
         {
             billysAngle = 360 - transform.localEulerAngles.y;
         }
-        else if (transform.localEulerAngles.y > 0 && transform.localEulerAngles.y <= 110)
+        else if (transform.localEulerAngles.y > 0 && transform.localEulerAngles.y <= 90)
         {
             billysAngle = transform.localEulerAngles.y;
         }
@@ -58,45 +54,6 @@ public class PlayerBilly : MonoBehaviour
 
     void BillysRotation()
     {
-        /*
-        if (billysAngle > maxAngle && GameController.Instance.direction == -1)
-        {
-            GameController.Instance.direction = 1;
-            turnedAround = true;
-            //Debug.Log("Turn left");
-        }
-        else if (billysAngle > maxAngle && GameController.Instance.direction == 1)
-        {
-            GameController.Instance.direction = -1;
-            turnedAround = true;
-            //Debug.Log("Turn right");
-        }
-        
-        if (billysAngle < 1.5f && turnedAround)
-        {
-            if (GameController.Instance.direction == 1 && transform.position.x < -1.5f)
-            {
-                //Debug.Log("Turn left side");
-                transform.position = new Vector3(-sideLimit, transform.position.y, transform.position.z);
-            }
-            else if (GameController.Instance.direction == -1 && transform.position.x > 1.5f)
-            {
-                //Debug.Log("Turn right side");
-                transform.position = new Vector3(sideLimit, transform.position.y, transform.position.z);
-            }
-            else if ((GameController.Instance.direction == 1 && transform.position.x > -0.5f) || (GameController.Instance.direction == -1 && transform.position.x < 0.5f))
-            {
-                //Debug.Log("Middle");
-                transform.position = new Vector3(0.0f, transform.position.y, transform.position.z);
-            }
-
-            GameController.Instance.direction = 0;
-            transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, 0.0f, transform.localEulerAngles.z);
-            billysAngle = 0.0f;
-            turnedAround = false;
-        }
-        */
-
         if ((GameController.Instance.direction == 1 && billysAngle > minAngle) || (GameController.Instance.direction == -1 && billysAngle > minAngle))
         {
             turnedAround = true;
@@ -106,14 +63,13 @@ public class PlayerBilly : MonoBehaviour
 
         if (billysAngle > maxAngle && turnedAround)
         {
-            GameController.Instance.direction = 0;
-            if (transform.localEulerAngles.y <= 290.0f && transform.localEulerAngles.y >= 90.0f)
+            if ((transform.localEulerAngles.y < (360.0f - maxAngle)) && (transform.localEulerAngles.y > (maxAngle + 20.0f)))
             {
-                transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, 290.0f, transform.localEulerAngles.z);
+                transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, 360.0f - maxAngle, transform.localEulerAngles.z);
             }
-            else if (transform.localEulerAngles.y >= 70.0f)
+            else if (transform.localEulerAngles.y > maxAngle)
             {
-                transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, 70.0f, transform.localEulerAngles.z);
+                transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, maxAngle, transform.localEulerAngles.z);
             }
         }
 
@@ -131,24 +87,14 @@ public class PlayerBilly : MonoBehaviour
         }
     }
 
-    void BoundariesDetection()
-    {
-        if (transform.position.x > sideLimit && billysAngle > maxAngle)
-        {
-            GameController.Instance.direction = -1;
-        }
-
-        if (transform.position.x < -sideLimit && billysAngle > maxAngle)
-        {
-            GameController.Instance.direction = 1;
-        }
-    }
-
-    
-
     void BillysAnimation()
     {
         billyAnimator.SetFloat("Speed", velocity.z);
+    }
+
+    void BackToCheckpointPosition()
+    {
+
     }
 
     void ExitGame()
@@ -164,7 +110,13 @@ public class PlayerBilly : MonoBehaviour
         if (collision.gameObject.layer == 6)
         {
             Debug.Log("Hit");
+            BackToCheckpointPosition();
+        }
 
+        if (collision.gameObject.layer == 7)
+        {
+            GameController.Instance.points += 1;
+            Destroy(collision.gameObject);
         }
     }
 }
