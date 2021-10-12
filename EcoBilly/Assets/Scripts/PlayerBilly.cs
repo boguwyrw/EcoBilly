@@ -7,8 +7,10 @@ public class PlayerBilly : MonoBehaviour
     float stage_1_speed = 6.0f;
     float stage_2_speed = 7.5f;
     float stage_3_speed = 9.0f;
+    float[] stagesSpeed = new float[3];
     float billyWalkingSpeed = 0.0f;
     int maxDamages = 5;
+    int finishedStages = 0;
     /*
     float billyRotationSpeed = 160.0f;
     float billysAngle = 0.0f;
@@ -20,15 +22,20 @@ public class PlayerBilly : MonoBehaviour
     Vector3 velocity;
     Vector3 startPosition;
     Vector3 restartPosition;
+    Quaternion startRotation;
 
     void Start()
     {
-        billyWalkingSpeed = stage_1_speed;
+        stagesSpeed[0] = 6.0f;
+        stagesSpeed[1] = 7.5f;
+        stagesSpeed[2] = 9.0f;
+        billyWalkingSpeed = stagesSpeed[finishedStages];
 
         billyAnimator = GetComponent<Animator>();
 
         startPosition = transform.position;
         restartPosition = startPosition;
+        startRotation = transform.rotation;
     }
 
     void FixedUpdate()
@@ -135,11 +142,14 @@ public class PlayerBilly : MonoBehaviour
         {
             float positionZ = other.gameObject.GetComponent<BoxCollider>().center.z;
             restartPosition = new Vector3(transform.position.x, transform.position.y, positionZ);
+            finishedStages += 1;
+            billyWalkingSpeed = stagesSpeed[finishedStages];
         }
 
         if (other.gameObject.layer == 10)
         {
             transform.position = restartPosition;
+            transform.rotation = startRotation;
         }
     }
 }
