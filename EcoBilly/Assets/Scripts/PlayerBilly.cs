@@ -8,7 +8,6 @@ public class PlayerBilly : MonoBehaviour
 
     float[] stagesSpeed = new float[3];
     float billyWalkingSpeed = 0.0f;
-    //int maxDamages = 5;
     int finishedStages = 0;
     bool isRestarted = false;
 
@@ -38,10 +37,6 @@ public class PlayerBilly : MonoBehaviour
         if (GameController.Instance.startGame)
         {
             BillysMovement();
-
-            //SetBillysAngles();
-
-            //BillysRotation();
         }
 
         BillysAnimation();
@@ -54,55 +49,6 @@ public class PlayerBilly : MonoBehaviour
         velocity = Vector3.forward * billyWalkingSpeed;
         transform.Translate(velocity * Time.deltaTime);
     }
-
-    /*
-    void SetBillysAngles()
-    {
-        if (transform.localEulerAngles.y < 360 && transform.localEulerAngles.y >= 270)
-        {
-            billysAngle = 360 - transform.localEulerAngles.y;
-        }
-        else if (transform.localEulerAngles.y > 0 && transform.localEulerAngles.y <= 90)
-        {
-            billysAngle = transform.localEulerAngles.y;
-        }
-    }
-
-    void BillysRotation()
-    {
-        if ((GameController.Instance.direction == 1 && billysAngle > minAngle) || (GameController.Instance.direction == -1 && billysAngle > minAngle))
-        {
-            turnedAround = true;
-        }
-
-        SetStraightPosition();
-
-        if (billysAngle > maxAngle && turnedAround)
-        {
-            if ((transform.localEulerAngles.y < (360.0f - maxAngle)) && (transform.localEulerAngles.y > (maxAngle + 20.0f)))
-            {
-                transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, 360.0f - maxAngle, transform.localEulerAngles.z);
-            }
-            else if (transform.localEulerAngles.y > maxAngle)
-            {
-                transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, maxAngle, transform.localEulerAngles.z);
-            }
-        }
-
-        transform.Rotate(Vector3.up, billyRotationSpeed * GameController.Instance.direction * Time.deltaTime);
-    }
-
-    void SetStraightPosition()
-    {
-        if (billysAngle < minAngle && turnedAround)
-        {
-            GameController.Instance.direction = 0;
-            transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, 0.0f, transform.localEulerAngles.z);
-            billysAngle = 0.0f;
-            turnedAround = false;
-        }
-    }
-    */
 
     void BillysAnimation()
     {
