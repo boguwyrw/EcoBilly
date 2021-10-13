@@ -4,38 +4,33 @@ using UnityEngine;
 
 public class PlayerBilly : MonoBehaviour
 {
-    float stage_1_speed = 6.0f;
-    float stage_2_speed = 7.5f;
-    float stage_3_speed = 9.0f;
+    [SerializeField] ParticleSystem splash;
+
     float[] stagesSpeed = new float[3];
     float billyWalkingSpeed = 0.0f;
-    int maxDamages = 5;
+    //int maxDamages = 5;
     int finishedStages = 0;
-    /*
-    float billyRotationSpeed = 160.0f;
-    float billysAngle = 0.0f;
-    float maxAngle = 60.0f;
-    float minAngle = 1.5f;
-    bool turnedAround = false;
-    */
+    bool isRestarted = false;
+
     Animator billyAnimator;
     Vector3 velocity;
     Vector3 startPosition;
     Vector3 restartPosition;
-    Quaternion startRotation;
+    PlayerBillyRotation playerBillyRotation;
 
     void Start()
     {
-        stagesSpeed[0] = 6.0f;
+        stagesSpeed[0] = 6.5f;
         stagesSpeed[1] = 7.5f;
-        stagesSpeed[2] = 9.0f;
+        stagesSpeed[2] = 8.5f;
         billyWalkingSpeed = stagesSpeed[finishedStages];
 
         billyAnimator = GetComponent<Animator>();
 
         startPosition = transform.position;
         restartPosition = startPosition;
-        startRotation = transform.rotation;
+
+        playerBillyRotation = GetComponent<PlayerBillyRotation>();
     }
 
     void FixedUpdate()
@@ -50,6 +45,8 @@ public class PlayerBilly : MonoBehaviour
         }
 
         BillysAnimation();
+
+        SplashDelay();
     }
 
     void BillysMovement()
@@ -112,10 +109,38 @@ public class PlayerBilly : MonoBehaviour
         billyAnimator.SetFloat("Speed", velocity.z);
     }
 
+    void SplashDelay()
+    {
+        if (splash.isPlaying)
+        {
+            GameController.Instance.startGame = false;
+        }
+        else if (!splash.isPlaying && isRestarted)
+        {
+            isRestarted = false;
+            GameController.Instance.startGame = true;
+            billyWalkingSpeed = stagesSpeed[finishedStages];
+        }
+    }
+
     void BackToCheckpointPosition()
     {
-        GameController.Instance.damages = 0;
+        isRestarted = true;
+        billyWalkingSpeed = 0.0f;
         transform.position = restartPosition;
+        splash.Play();
+    }
+
+    void SetFinishRotation()
+    {
+        if (transform.localEulerAngles.y < 360.0f && transform.localEulerAngles.y > (360.0f - playerBillyRotation.maxAngleY))
+        {
+            playerBillyRotation.rotationLeft = true;
+        }
+        else if (transform.localEulerAngles.y > 0.0f && transform.localEulerAngles.y < playerBillyRotation.maxAngleY)
+        {
+            playerBillyRotation.rotationRight = true;
+        }
     }
 
     void OnCollisionEnter(Collision collision)
@@ -123,7 +148,7 @@ public class PlayerBilly : MonoBehaviour
         if (collision.gameObject.layer == 6)
         {
             GameController.Instance.damages += 1;
-            if (GameController.Instance.damages == maxDamages)
+            if (GameController.Instance.damages == GameController.Instance.maxDamages)
             {
                 BackToCheckpointPosition();
             }
@@ -138,18 +163,27 @@ public class PlayerBilly : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        if (other.gameObject.layer == 8)
+        {
+            billyWalkingSpeed = 0.0f;
+            GameController.Instance.finishedGame = true;
+            SetFinishRotation();
+        }
+
         if (other.gameObject.layer == 9)
         {
-            float positionZ = other.gameObject.GetComponent<BoxCollider>().center.z;
+            BoxCollider otherBoxCollider = other.gameObject.GetComponent<BoxCollider>();
+            float positionZ = otherBoxCollider.center.z;
             restartPosition = new Vector3(transform.position.x, transform.position.y, positionZ);
             finishedStages += 1;
             billyWalkingSpeed = stagesSpeed[finishedStages];
+            otherBoxCollider.enabled = false;
         }
 
         if (other.gameObject.layer == 10)
         {
-            transform.position = restartPosition;
-            transform.rotation = startRotation;
+            BackToCheckpointPosition();
+            GameController.Instance.BillysLifesSystem();
         }
     }
 }
