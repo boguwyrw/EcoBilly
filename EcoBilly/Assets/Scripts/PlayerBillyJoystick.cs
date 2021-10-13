@@ -41,8 +41,8 @@ public class PlayerBillyJoystick : MonoBehaviour
     {
         if (GameController.Instance.startGame)
         {
-            //transform.localEulerAngles = new Vector3(0.0f, maxAngleY * joystick.Horizontal, 0.0f);
-            transform.localEulerAngles = new Vector3(0.0f, maxAngleY * direction, 0.0f);
+            //transform.localEulerAngles = new Vector3(0.0f, maxAngleY * joystick.Horizontal, 0.0f); // joystick rotation
+            transform.localEulerAngles = new Vector3(0.0f, maxAngleY * direction, 0.0f); // swipe finger rotation
         }
     }
 
