@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
@@ -23,13 +24,16 @@ public class GameController : MonoBehaviour
 
     [SerializeField] Transform playerBilly;
     [SerializeField] GameObject billysLifesGO;
+    [SerializeField] GameObject buttonsGO;
+    [SerializeField] GameObject congratulationsPanelGO;
+    [SerializeField] GameObject gameOverPanelGO;
     [SerializeField] Text pointsText;
     [SerializeField] Text damagesText;
     [SerializeField] Sprite eliminatedBilly;
     [SerializeField] ParticleSystem fireworks;
 
     Image[] billysLifes;
-    int lifes = 0;
+    int wastedLives = 0;
     bool fireworksFired = false;
 
     [HideInInspector] public int direction = 0;
@@ -62,31 +66,40 @@ public class GameController : MonoBehaviour
             BillysLifesSystem();
         }
 
-        if (lifes == 3)
-        {
-            startGame = false;
-            endGame = true;
-            playerBilly.gameObject.SetActive(false);
-        }
+        LoseGame();
 
-        FireworksExplosion();
+        WinFireworksExplosion();
 
         ExitGame();
     }
 
     public void BillysLifesSystem()
     {
-        billysLifes[lifes].sprite = eliminatedBilly;
+        billysLifes[wastedLives].sprite = eliminatedBilly;
         damages = 0;
-        lifes += 1;
+        wastedLives += 1;
     }
 
-    void FireworksExplosion()
+    void LoseGame()
+    {
+        if (wastedLives == 3)
+        {
+            startGame = false;
+            endGame = true;
+            playerBilly.gameObject.SetActive(false);
+            buttonsGO.SetActive(true);
+            gameOverPanelGO.SetActive(true);
+        }
+    }
+
+    void WinFireworksExplosion()
     {
         if (finishedGame && !fireworksFired)
         {
             fireworks.Play();
             fireworksFired = true;
+            buttonsGO.SetActive(true);
+            congratulationsPanelGO.SetActive(true);
         }
     }
 
@@ -94,8 +107,18 @@ public class GameController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Application.Quit();
+            LeaveGame();
         }
+    }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    public void LeaveGame()
+    {
+        Application.Quit();
     }
 
     public bool IsPointerOverUI()

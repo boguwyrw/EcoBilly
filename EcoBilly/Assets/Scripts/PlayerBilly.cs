@@ -5,17 +5,22 @@ using UnityEngine;
 public class PlayerBilly : MonoBehaviour
 {
     [SerializeField] ParticleSystem splash;
+    [SerializeField] ParticleSystem rakeRangePS;
 
     float[] stagesSpeed = new float[3];
     float billyWalkingSpeed = 0.0f;
+    float rakeTime = 0.0f;
+    float rakeTimeValue = 5.0f;
     int finishedStages = 0;
     bool isRestarted = false;
+    bool canActiveRake = false;
 
     Animator billyAnimator;
     Vector3 velocity;
     Vector3 startPosition;
     Vector3 restartPosition;
     PlayerBillyRotation playerBillyRotation;
+    SphereCollider rakeRangeSC;
 
     void Start()
     {
@@ -30,6 +35,9 @@ public class PlayerBilly : MonoBehaviour
         restartPosition = startPosition;
 
         playerBillyRotation = GetComponent<PlayerBillyRotation>();
+        rakeRangeSC = GetComponent<SphereCollider>();
+
+        rakeTime = rakeTimeValue;
     }
 
     void FixedUpdate()
@@ -42,6 +50,8 @@ public class PlayerBilly : MonoBehaviour
         BillysAnimation();
 
         SplashDelay();
+
+        RakeFunctionality();
     }
 
     void BillysMovement()
@@ -66,6 +76,22 @@ public class PlayerBilly : MonoBehaviour
             isRestarted = false;
             GameController.Instance.startGame = true;
             billyWalkingSpeed = stagesSpeed[finishedStages];
+        }
+    }
+
+    void RakeFunctionality()
+    {
+        if (canActiveRake)
+        {
+            rakeTime -= Time.deltaTime;
+
+            if (rakeTime <= 0.0f)
+            {
+                rakeRangeSC.enabled = false;
+                rakeRangePS.Stop();
+                canActiveRake = false;
+                rakeTime = rakeTimeValue;
+            }
         }
     }
 
@@ -130,6 +156,14 @@ public class PlayerBilly : MonoBehaviour
         {
             BackToCheckpointPosition();
             GameController.Instance.BillysLifesSystem();
+        }
+
+        if (other.gameObject.layer == 11)
+        {
+            rakeRangeSC.enabled = true;
+            Destroy(other.transform.parent.gameObject);
+            rakeRangePS.Play();
+            canActiveRake = true;
         }
     }
 }
