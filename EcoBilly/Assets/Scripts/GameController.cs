@@ -27,10 +27,14 @@ public class GameController : MonoBehaviour
     [SerializeField] GameObject buttonsGO;
     [SerializeField] GameObject congratulationsPanelGO;
     [SerializeField] GameObject gameOverPanelGO;
+    [SerializeField] GameObject bestScorePanelGO;
     [SerializeField] Text pointsText;
     [SerializeField] Text damagesText;
+    [SerializeField] Text bestScoreText;
     [SerializeField] Sprite eliminatedBilly;
     [SerializeField] ParticleSystem fireworks;
+    [SerializeField] AudioSource audioSource;
+    [SerializeField] AudioClip[] audioClips;
 
     Image[] billysLifes;
     int wastedLives = 0;
@@ -38,6 +42,7 @@ public class GameController : MonoBehaviour
 
     [HideInInspector] public int direction = 0;
     [HideInInspector] public int points = 0;
+    [HideInInspector] public int bestScore = 0;
     [HideInInspector] public int damages = 0;
     [HideInInspector] public int maxDamages = 5;
     [HideInInspector] public bool startGame = false;
@@ -54,12 +59,23 @@ public class GameController : MonoBehaviour
         {
             billysLifes[i] = billysLifesGO.transform.GetChild(i).GetComponent<Image>();
         }
+
+        if (PlayerPrefs.HasKey("BestScore"))
+        {
+            bestScore = PlayerPrefs.GetInt("BestScore");
+        }
     }
 
     void Update()
     {
         pointsText.text = "Points: " + points.ToString();
+        bestScoreText.text = "Best score: " + bestScore.ToString();
         damagesText.text = "Damages: " + damages.ToString();
+
+        if (bestScore < points)
+        {
+            bestScore = points;
+        }
 
         if (damages == maxDamages)
         {
@@ -80,6 +96,30 @@ public class GameController : MonoBehaviour
         wastedLives += 1;
     }
 
+    public void CollectingSound()
+    {
+        audioSource.clip = audioClips[0];
+        audioSource.Play();
+    }
+
+    public void RakeCollectingSound()
+    {
+        audioSource.clip = audioClips[1];
+        audioSource.Play();
+    }
+
+    public void TouchSound()
+    {
+        audioSource.clip = audioClips[2];
+        audioSource.Play();
+    }
+
+    public void OutOfBorderSound()
+    {
+        audioSource.clip = audioClips[3];
+        audioSource.Play();
+    }
+
     void LoseGame()
     {
         if (wastedLives == 3)
@@ -87,8 +127,7 @@ public class GameController : MonoBehaviour
             startGame = false;
             endGame = true;
             playerBilly.gameObject.SetActive(false);
-            buttonsGO.SetActive(true);
-            gameOverPanelGO.SetActive(true);
+            ActiveEndGamePanels(gameOverPanelGO);
         }
     }
 
@@ -98,9 +137,16 @@ public class GameController : MonoBehaviour
         {
             fireworks.Play();
             fireworksFired = true;
-            buttonsGO.SetActive(true);
-            congratulationsPanelGO.SetActive(true);
+            ActiveEndGamePanels(congratulationsPanelGO);
         }
+    }
+
+    void ActiveEndGamePanels(GameObject rightPanel)
+    {
+        buttonsGO.SetActive(true);
+        rightPanel.SetActive(true);
+        bestScorePanelGO.SetActive(true);
+        PlayerPrefs.SetInt("BestScore", bestScore);
     }
 
     void ExitGame()

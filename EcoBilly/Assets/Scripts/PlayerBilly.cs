@@ -10,7 +10,7 @@ public class PlayerBilly : MonoBehaviour
     float[] stagesSpeed = new float[3];
     float billyWalkingSpeed = 0.0f;
     float rakeTime = 0.0f;
-    float rakeTimeValue = 5.0f;
+    float rakeTimeValue = 7.5f;
     int finishedStages = 0;
     bool isRestarted = false;
     bool canActiveRake = false;
@@ -87,12 +87,17 @@ public class PlayerBilly : MonoBehaviour
 
             if (rakeTime <= 0.0f)
             {
-                rakeRangeSC.enabled = false;
-                rakeRangePS.Stop();
-                canActiveRake = false;
-                rakeTime = rakeTimeValue;
+                TurnOffRakeRange();
             }
         }
+    }
+
+    void TurnOffRakeRange()
+    {
+        rakeRangeSC.enabled = false;
+        rakeRangePS.Stop();
+        canActiveRake = false;
+        rakeTime = rakeTimeValue;
     }
 
     void BackToCheckpointPosition()
@@ -100,6 +105,7 @@ public class PlayerBilly : MonoBehaviour
         isRestarted = true;
         billyWalkingSpeed = 0.0f;
         transform.position = restartPosition;
+        TurnOffRakeRange();
         splash.Play();
     }
 
@@ -120,6 +126,7 @@ public class PlayerBilly : MonoBehaviour
         if (collision.gameObject.layer == 6)
         {
             GameController.Instance.damages += 1;
+            GameController.Instance.TouchSound();
             if (GameController.Instance.damages == GameController.Instance.maxDamages)
             {
                 BackToCheckpointPosition();
@@ -129,12 +136,19 @@ public class PlayerBilly : MonoBehaviour
         if (collision.gameObject.layer == 7)
         {
             GameController.Instance.points += 1;
+            GameController.Instance.CollectingSound();
             Destroy(collision.gameObject);
         }
     }
 
     void OnTriggerEnter(Collider other)
     {
+        if ((other.gameObject.layer == 7) || (other.gameObject.layer == 7 && canActiveRake))
+        {
+            GameController.Instance.points += 1;
+            GameController.Instance.CollectingSound();
+        }
+
         if (other.gameObject.layer == 8)
         {
             billyWalkingSpeed = 0.0f;
@@ -155,11 +169,14 @@ public class PlayerBilly : MonoBehaviour
         if (other.gameObject.layer == 10)
         {
             BackToCheckpointPosition();
+            TurnOffRakeRange();
+            GameController.Instance.OutOfBorderSound();
             GameController.Instance.BillysLifesSystem();
         }
 
         if (other.gameObject.layer == 11)
         {
+            GameController.Instance.RakeCollectingSound();
             rakeRangeSC.enabled = true;
             Destroy(other.transform.parent.gameObject);
             rakeRangePS.Play();
