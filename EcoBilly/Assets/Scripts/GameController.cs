@@ -28,6 +28,8 @@ public class GameController : MonoBehaviour
     [SerializeField] GameObject congratulationsPanelGO;
     [SerializeField] GameObject gameOverPanelGO;
     [SerializeField] GameObject bestScorePanelGO;
+    [SerializeField] GameObject berakingPanelGO;
+    [SerializeField] GameObject wateringPanelGO;
     [SerializeField] Text pointsText;
     [SerializeField] Text damagesText;
     [SerializeField] Text bestScoreText;
@@ -70,7 +72,7 @@ public class GameController : MonoBehaviour
     {
         pointsText.text = "Points: " + points.ToString();
         bestScoreText.text = "Best score: " + bestScore.ToString();
-        damagesText.text = "Damages: " + damages.ToString();
+        damagesText.text = "Plants damages: " + damages.ToString();
 
         if (bestScore < points)
         {
@@ -108,16 +110,48 @@ public class GameController : MonoBehaviour
         audioSource.Play();
     }
 
-    public void TouchSound()
+    public void WateringCanCollectingSound()
     {
         audioSource.clip = audioClips[2];
         audioSource.Play();
     }
 
-    public void OutOfBorderSound()
+    public void TouchSound()
     {
         audioSource.clip = audioClips[3];
         audioSource.Play();
+    }
+
+    public void WateringSound()
+    {
+        audioSource.clip = audioClips[4];
+        audioSource.Play();
+    }
+
+    public void OutOfBorderSound()
+    {
+        audioSource.clip = audioClips[5];
+        audioSource.Play();
+    }
+
+    public void BerakingInfoOn()
+    {
+        berakingPanelGO.SetActive(true);
+    }
+
+    public void BerakingInfoOff()
+    {
+        berakingPanelGO.SetActive(false);
+    }
+
+    public void WateringInfoOn()
+    {
+        wateringPanelGO.SetActive(true);
+    }
+
+    public void WateringInfoOff()
+    {
+        wateringPanelGO.SetActive(false);
     }
 
     void LoseGame()

@@ -6,14 +6,18 @@ public class PlayerBilly : MonoBehaviour
 {
     [SerializeField] ParticleSystem splash;
     [SerializeField] ParticleSystem rakeRangePS;
+    [SerializeField] ParticleSystem cloudPS;
 
     float[] stagesSpeed = new float[3];
     float billyWalkingSpeed = 0.0f;
     float rakeTime = 0.0f;
-    float rakeTimeValue = 7.5f;
+    float wateringTime = 0.0f;
+    float rakeTimeValue = 6.5f;
+    float wateringTimeValue = 7.5f;
     int finishedStages = 0;
     bool isRestarted = false;
     bool canActiveRake = false;
+    bool canActiveWatering = false;
 
     Animator billyAnimator;
     Vector3 velocity;
@@ -25,8 +29,8 @@ public class PlayerBilly : MonoBehaviour
     void Start()
     {
         stagesSpeed[0] = 6.5f;
-        stagesSpeed[1] = 7.5f;
-        stagesSpeed[2] = 8.5f;
+        stagesSpeed[1] = 7.0f;
+        stagesSpeed[2] = 8.0f;
         billyWalkingSpeed = stagesSpeed[finishedStages];
 
         billyAnimator = GetComponent<Animator>();
@@ -38,6 +42,7 @@ public class PlayerBilly : MonoBehaviour
         rakeRangeSC = GetComponent<SphereCollider>();
 
         rakeTime = rakeTimeValue;
+        wateringTime = wateringTimeValue;
     }
 
     void FixedUpdate()
@@ -52,6 +57,10 @@ public class PlayerBilly : MonoBehaviour
         SplashDelay();
 
         RakeFunctionality();
+
+        WateringFunctionality();
+
+        AssignLifetimeValue(wateringTime);
     }
 
     void BillysMovement()
@@ -92,12 +101,41 @@ public class PlayerBilly : MonoBehaviour
         }
     }
 
+    void WateringFunctionality()
+    {
+        if (canActiveWatering)
+        {
+            wateringTime -= Time.deltaTime;
+
+            if (wateringTime <= 0.0f)
+            {
+                TurnOffWatering();
+            }
+        }
+    }
+
     void TurnOffRakeRange()
     {
+        GameController.Instance.BerakingInfoOff();
         rakeRangeSC.enabled = false;
         rakeRangePS.Stop();
         canActiveRake = false;
         rakeTime = rakeTimeValue;
+    }
+
+    void TurnOffWatering()
+    {
+        //AssignLifetimeValue(0.1f);
+        GameController.Instance.WateringInfoOff();
+        cloudPS.Stop();
+        canActiveWatering = false;
+        wateringTime = wateringTimeValue;
+    }
+
+    void AssignLifetimeValue(float lifetimeValue)
+    {
+        var cloudMain = cloudPS.main;
+        cloudMain.startLifetime = lifetimeValue;
     }
 
     void BackToCheckpointPosition()
@@ -123,13 +161,21 @@ public class PlayerBilly : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.layer == 6)
+        if (collision.gameObject.layer == 6 && !canActiveWatering)
         {
             GameController.Instance.damages += 1;
             GameController.Instance.TouchSound();
             if (GameController.Instance.damages == GameController.Instance.maxDamages)
             {
                 BackToCheckpointPosition();
+            }
+        }
+        else if (collision.gameObject.layer == 6 && canActiveWatering)
+        {
+            GameController.Instance.WateringSound();
+            if (GameController.Instance.damages > 0)
+            {
+                GameController.Instance.damages -= 1;
             }
         }
 
@@ -149,7 +195,8 @@ public class PlayerBilly : MonoBehaviour
             GameController.Instance.CollectingSound();
         }
 
-        if (other.gameObject.layer == 8)
+        //if (other.gameObject.layer == 8)
+        if (other.gameObject.layer == 8 && !canActiveRake)
         {
             billyWalkingSpeed = 0.0f;
             GameController.Instance.finishedGame = true;
@@ -160,16 +207,20 @@ public class PlayerBilly : MonoBehaviour
         {
             BoxCollider otherBoxCollider = other.gameObject.GetComponent<BoxCollider>();
             float positionZ = otherBoxCollider.center.z;
-            restartPosition = new Vector3(transform.position.x, transform.position.y, positionZ);
-            finishedStages += 1;
-            billyWalkingSpeed = stagesSpeed[finishedStages];
             otherBoxCollider.enabled = false;
+            restartPosition = new Vector3(transform.position.x, transform.position.y, positionZ);
+            if (finishedStages < 2)
+            {
+                finishedStages += 1;
+            }
+            billyWalkingSpeed = stagesSpeed[finishedStages];
         }
 
         if (other.gameObject.layer == 10)
         {
             BackToCheckpointPosition();
             TurnOffRakeRange();
+            TurnOffWatering();
             GameController.Instance.OutOfBorderSound();
             GameController.Instance.BillysLifesSystem();
         }
@@ -177,10 +228,21 @@ public class PlayerBilly : MonoBehaviour
         if (other.gameObject.layer == 11)
         {
             GameController.Instance.RakeCollectingSound();
+            GameController.Instance.BerakingInfoOn();
             rakeRangeSC.enabled = true;
             Destroy(other.transform.parent.gameObject);
             rakeRangePS.Play();
             canActiveRake = true;
+        }
+
+        if (other.gameObject.layer == 12)
+        {
+            GameController.Instance.WateringCanCollectingSound();
+            GameController.Instance.WateringInfoOn();
+            canActiveWatering = true;
+            //AssignLifetimeValue(5.0f);
+            cloudPS.Play();
+            Destroy(other.transform.parent.gameObject);
         }
     }
 }

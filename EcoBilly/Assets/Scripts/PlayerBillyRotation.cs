@@ -7,14 +7,14 @@ public class PlayerBillyRotation : MonoBehaviour
     [SerializeField] Joystick joystick = null;
 
     float direction = 0.0f;
-    float swipeRange = 100.0f;
-    float rotationSpeed = 120.0f;
+    float swipeRange = 150.0f;
+    float rotationSpeed = 110.0f;
     Vector2 touchStartPosition;
     Vector2 touchCurrentPosition;
 
     Touch touch;
 
-    [HideInInspector] public float maxAngleY = 75.0f;
+    [HideInInspector] public float maxAngleY = 60.0f;
     [HideInInspector] public bool rotationLeft = false;
     [HideInInspector] public bool rotationRight = false;
 
