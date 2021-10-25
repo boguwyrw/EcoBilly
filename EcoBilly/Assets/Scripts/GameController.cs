@@ -52,6 +52,7 @@ public class GameController : MonoBehaviour
     [HideInInspector] public bool finishedGame = false;
 
     public Image startImage;
+    public GameObject[] flames;
 
     void Start()
     {
@@ -128,9 +129,15 @@ public class GameController : MonoBehaviour
         audioSource.Play();
     }
 
-    public void OutOfBorderSound()
+    public void CheckpointSound()
     {
         audioSource.clip = audioClips[5];
+        audioSource.Play();
+    }
+
+    public void OutOfBorderSound()
+    {
+        audioSource.clip = audioClips[6];
         audioSource.Play();
     }
 
@@ -162,6 +169,8 @@ public class GameController : MonoBehaviour
             endGame = true;
             playerBilly.gameObject.SetActive(false);
             ActiveEndGamePanels(gameOverPanelGO);
+            BerakingInfoOff();
+            WateringInfoOff();
         }
     }
 
@@ -172,6 +181,8 @@ public class GameController : MonoBehaviour
             fireworks.Play();
             fireworksFired = true;
             ActiveEndGamePanels(congratulationsPanelGO);
+            BerakingInfoOff();
+            WateringInfoOff();
         }
     }
 
